@@ -1,0 +1,2 @@
+python-dotenv==1.0.0
+twitchio==2.6.0
