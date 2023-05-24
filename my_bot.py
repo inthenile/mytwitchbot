@@ -87,14 +87,15 @@ class Bot(commands.Bot):
                 await context.send(f"{bot_choice.upper()}. EZ win.")
             case "paper":
                 await context.send(f"{bot_choice.upper()}. Tie. Go again.")
-
+                
+    # Incomplete. Will write a command so that the bot can be shut down.
     @commands.command()
     async def close(self, context):
         if context.author.name != f"{bot_owner}".lower():
             await context.send(f"You have no power here.")
         else:
             await context.send(f"{bot_owner} wants me gone.")
-            await self.close()
+            
 
 # instantiate the Bot class
 bot = Bot()
