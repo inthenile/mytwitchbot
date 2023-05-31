@@ -1,7 +1,6 @@
 from twitchio.ext import commands
 import random
 from dotenv import dotenv_values
-import os
 
 # a list for a game of rock, scissors and paper
 rock_scissors_paper = ["rock", "scissors", "paper"]
@@ -11,6 +10,8 @@ config = dotenv_values(".env")
 twitch_oauth_token = config["TWITCH_OAUTH_TOKEN"]
 channels_to_connect = config["CHANNELS_TO_CONNECT"]
 bot_owner = config["BOT_OWNER"]
+spotify_client_id = config["SPOTIFY_CLIENT_ID"]
+spotify_client_secret = config["SPOTIFY_CLIENT_SECRET"]
 
 class Bot(commands.Bot):
 
@@ -88,13 +89,6 @@ class Bot(commands.Bot):
             case "paper":
                 await context.send(f"{bot_choice.upper()}. Tie. Go again.")
 
-    @commands.command()
-    async def close(self, context):
-        if context.author.name != f"{bot_owner}".lower():
-            await context.send(f"You have no power here.")
-        else:
-            await context.send(f"{bot_owner} wants me gone.")
-            await self.close()
 
 # instantiate the Bot class
 bot = Bot()
