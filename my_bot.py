@@ -1,7 +1,6 @@
 from twitchio.ext import commands
 import random
 from dotenv import dotenv_values
-import os
 
 # a list for a game of rock, scissors and paper
 rock_scissors_paper = ["rock", "scissors", "paper"]

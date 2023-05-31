@@ -1,6 +1,5 @@
 import my_routines
 import my_bot
-from twitchio.ext import commands
 
 # Start the reminder routines.
 my_routines.follow_reminder.start()
