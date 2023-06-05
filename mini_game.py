@@ -2,9 +2,8 @@ import asyncio
 import twitchio
 import my_bot
 
+#  list to store users who type the  game word into, and select index 0 to get the first one to type.
 list_of_users = []
-game_active = False
-game_word = "beep boop"
 
 """function for the mini game of beep boop (found in my_routines)"""
 async def mini_game(response: twitchio.Message):

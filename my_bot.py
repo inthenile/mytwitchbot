@@ -57,7 +57,7 @@ class Bot(commands.Bot):
             # receives messages and responses to commands.
             await self.handle_commands(message)
 
-    #shutdown the boss from the chat
+    # shutdown the bot from the chat
     async def close(self):
         sys.exit(0)
 
