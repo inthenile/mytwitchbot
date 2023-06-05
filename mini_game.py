@@ -8,7 +8,7 @@ list_of_users = []
 """function for the mini game of beep boop (found in my_routines)"""
 async def mini_game(response: twitchio.Message):
     if response.content == my_bot.bot.game_word and not response.echo:
-        print("Beep boop received")
+        print(f"{my_bot.bot.game_word} received")
         list_of_users.append(response.author.name)
 
 async def check_game_status():
