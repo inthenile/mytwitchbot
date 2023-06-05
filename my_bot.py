@@ -40,9 +40,10 @@ class Bot(commands.Bot):
         # ignore messages by the bot unless it is part of the mini-game
         if message.echo and message.content != f"{self.game_word}":
             return
+        # just to let the user know about a game starting (can be removed)
         elif message.echo and message.content == f"{self.game_word}":
             print("A mini-game has just started")
-        # if the game is active, pass the messages sent as an argument to the mini game.
+        # if the game is active, pass the messages sent as an argument to the mini-game.
         if self.game_active:
             await mini_game.mini_game(message)
             # shows the messages in the terminal
