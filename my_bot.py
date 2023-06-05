@@ -1,9 +1,10 @@
 import sys
-
 from twitchio.ext import commands
 import mini_game
 import random
 from dotenv import dotenv_values
+
+import scoreboard
 
 # accessing sensitive information through .env
 config = dotenv_values(".env")
@@ -73,7 +74,7 @@ class Bot(commands.Bot):
             await context.send(f"Hello there, boss!")
 
     @commands.command()
-    async def rock(self, context):
+    async def rock(self, context: commands.Context):
         """Plays rock, paper, scissors"""
         bot_choice = random.choice(rock_scissors_paper)
         await context.send(f"I choose...")
@@ -86,7 +87,7 @@ class Bot(commands.Bot):
                 await context.send(f"{bot_choice.upper()}. Imagine losing to a bot. KEKW")
 
     @commands.command()
-    async def scissors(self, context):
+    async def scissors(self, context: commands.Context):
         """Plays rock, scissors, paper"""
         bot_choice = random.choice(rock_scissors_paper)
         await context.send(f"I choose...")
@@ -99,7 +100,7 @@ class Bot(commands.Bot):
                 await context.send(f"{bot_choice.upper()}. You won.")
 
     @commands.command()
-    async def paper(self, context):
+    async def paper(self, context: commands.Context):
         """Plays rock, scissors, paper"""
         bot_choice = random.choice(rock_scissors_paper)
         await context.send(f"I choose...")
@@ -112,12 +113,27 @@ class Bot(commands.Bot):
                 await context.send(f"{bot_choice.upper()}. Tie. Go again.")
 
     @commands.command()
-    async def shutdown(self, context):
+    async def shutdown(self, context: commands.Context):
+        """turn the bot off from the chat"""
         if context.author.name != f"{bot_owner}".lower():
             await context.send(f"You have no power here.")
         else:
             await context.send(f"{bot_owner} wants me gone. Goodbye :(")
             await self.close()
+
+    @commands.command()
+    async def score(self, context: commands.Context):
+        """check the score for the mini-game with #score in the chat"""
+        try:
+            user = context.author.name
+            score = scoreboard.Score(user)
+            point = await score.get_score(user)
+            await context.send(f"{context.author.mention} has {point} points.")
+        # if no local file has been located
+        except FileNotFoundError:
+            await context.send(f"There was a problem with the scoreboard.")
+
+
 
 # instantiate the Bot class
 bot = Bot()
