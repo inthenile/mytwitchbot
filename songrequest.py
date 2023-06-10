@@ -5,8 +5,10 @@ from googleapiclient.discovery import build
 import google_auth_oauthlib.flow
 from google.auth.transport.requests import Request
 
+
 config = dotenv_values(".env")
-scopes = ["https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/youtubepartner", "https://www.googleapis.com/auth/youtube"]
+scopes = ["https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/youtubepartner",
+          "https://www.googleapis.com/auth/youtube"]
 youtube_api_key = config["YOUTUBE_API_KEY"]
 youtube_channel_id = config["YOUTUBE_CHANNEL_ID"]
 client_secrets_file = ".clients_secret.json"
@@ -14,16 +16,18 @@ api_service_name = "youtube"
 api_version = "v3"
 
 credentials = None
-#this creates a private playlist after authorization
+playlist_id = None
 
-#if we have saved our credentials, we load them
+# this creates a private playlist after authorization or loads it if we saved a previous playlist id
+
+# if we have saved our credentials, we load them
 if os.path.exists('token.pickle'):
     print('Loading Credentials from file...')
     with open('token.pickle', 'rb') as token:
         credentials = pickle.load(token)
 # creating a playlist by way of example
 
-#else we refresh/get new ones / which also means we should have no dedicated playlist, so we create one and grab its ID
+# else we refresh/get new ones / which also means we should have no dedicated playlist, so we create one and grab its ID
 if not credentials or not credentials.valid:
     if credentials and credentials.expired and credentials.refresh_token:
         print("Refreshing token")
@@ -33,30 +37,46 @@ if not credentials or not credentials.valid:
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
         flow.run_local_server()
         credentials = flow.credentials
-        #writing credentials onto token.pickle for future use
+        # writing credentials onto token.pickle for future use
         with open('token.pickle', 'wb') as token:
             pickle.dump(credentials, token)
     youtube = build(api_service_name, api_version, credentials=credentials)
 
-def make_playlist():
-    request = youtube.playlists().insert(
-        part="snippet,status",
-        body={
-            "snippet": {
-                "title": "Stream playlist",
-                "description": "This is where songrequests will go.",
-            },
-            "status": {
-                "privacyStatus": "public"
-            }
-        }
-    )
-    response = request.execute()
-    playlist_id = response["id"]
-    return playlist_id
+class Playlist:
+    def __init__(self, pl_id):
+        self.pl_id = pl_id
 
-pl_id = make_playlist()
-def song_request(playlistId, videoId):
+    async def make_playlist(self):
+        request = youtube.playlists().insert(
+            part="snippet,status",
+            body={
+                "snippet": {
+                    "title": "Stream playlist",
+                    "description": "This is where song requests will go.",
+                },
+                "status": {
+                    "privacyStatus": "private"
+                }
+            }
+        )
+        response = request.execute()
+        self.pl_id = response["id"]
+        return self.pl_id
+
+# checking if playlist id has been written to a txt file, else we run make_playlist and write the playlist id to the text file
+if os.path.exists("playlist.txt"):
+    print("You already have a playlist ready to go")
+    with open("playlist.txt", "r") as file:
+        playlist_id = file.readline()
+else:
+    pl = Playlist(pl_id=None)
+    pl.make_playlist()
+    playlist_id = pl.pl_id
+    with open("playlist.txt", "w") as file:
+        file.write(str(playlist_id))
+
+
+async def song_request(playlistId, videoId):
     from urllib.parse import urlparse
     parsed_id = urlparse(videoId)
     parsed_link = None
@@ -66,7 +86,7 @@ def song_request(playlistId, videoId):
         parsed_link = parsed_id.path[1:]
     else:
         print("Bad link.")
-    print(parsed_id)
+
     add_to_playlist = youtube.playlistItems().insert(
         part="snippet",
         body={
@@ -80,5 +100,6 @@ def song_request(playlistId, videoId):
         }
     )
     add_to_playlist.execute()
+    print("Song successfully added to playlist.")
 
-#song_request(pl_id,"youtubelink")
+

@@ -1,5 +1,6 @@
 import my_routines
 import my_bot
+from songrequest import Playlist
 
 # Start the reminder routines.
 my_routines.follow_reminder.start()

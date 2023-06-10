@@ -3,7 +3,7 @@ from twitchio.ext import commands
 import mini_game
 import random
 from dotenv import dotenv_values
-
+import songrequest
 import scoreboard
 
 # accessing sensitive information through .env
@@ -135,9 +135,23 @@ class Bot(commands.Bot):
 
     @commands.command(aliases= ["songrequest"])
     async def sr(self, context: commands.Context):
-        # songrequest code goes here
-        return
-
+        # parse user command to get the youtube link.
+        # if they use #sr
+        if "#sr" in context.message.content[:3]:
+            print(songrequest.playlist_id, context.message.content[4:])
+            link = context.message.content[4:]
+            print(str(link))
+        #else it must be #songrequest
+        else:
+            print(songrequest.playlist_id, context.message.content[13:])
+            link = context.message.content[13:]
+            print(str(link))
+        try:
+            await songrequest.song_request(songrequest.playlist_id, link)
+            await context.send("Song added to playlist.")
+        except Exception as e:
+            await context.send("I cannot play that link. Make sure it is a valid YouTube link.")
+            print(e)
 
 # instantiate the Bot class
 bot = Bot()
