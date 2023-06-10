@@ -3,3 +3,5 @@ env/
 __pycache__/
 .idea
 Scores/scores.json
+.clients_secret.json
+token.pickle

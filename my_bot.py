@@ -133,6 +133,10 @@ class Bot(commands.Bot):
         except FileNotFoundError:
             await context.send(f"There was a problem with the scoreboard.")
 
+    @commands.command(aliases= ["songrequest"])
+    async def sr(self, context: commands.Context):
+        # songrequest code goes here
+        return
 
 
 # instantiate the Bot class
