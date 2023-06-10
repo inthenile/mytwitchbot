@@ -1,5 +1,5 @@
-pip~=23.1.2
-attrs~=23.1.0
-setuptools~=67.8.0
 twitchio~=2.6.0
 python-dotenv~=1.0.0
+google-auth==2.19.1
+google-api-python-client==2.88.0
+google-auth-oauthlib==1.0.0
