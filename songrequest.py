@@ -47,34 +47,30 @@ class Playlist:
         self.pl_id = pl_id
 
     async def make_playlist(self):
-        request = youtube.playlists().insert(
-            part="snippet,status",
-            body={
-                "snippet": {
-                    "title": "Stream playlist",
-                    "description": "This is where song requests will go.",
-                },
-                "status": {
-                    "privacyStatus": "private"
+        # check if you already have a playlist saved
+        if os.path.exists("playlist.txt"):
+            print("You already have a playlist ready to go")
+            with open("playlist.txt", "r") as file:
+                self.pl_id = file.readline()
+                return self.pl_id
+        else:
+            request = youtube.playlists().insert(
+                part="snippet,status",
+                body={
+                    "snippet": {
+                        "title": "Stream playlist",
+                        "description": "This is where song requests will go.",
+                    },
+                    "status": {
+                        "privacyStatus": "private"
+                    }
                 }
-            }
-        )
-        response = request.execute()
-        self.pl_id = response["id"]
-        return self.pl_id
-
-# checking if playlist id has been written to a txt file, else we run make_playlist and write the playlist id to the text file
-if os.path.exists("playlist.txt"):
-    print("You already have a playlist ready to go")
-    with open("playlist.txt", "r") as file:
-        playlist_id = file.readline()
-else:
-    pl = Playlist(pl_id=None)
-    pl.make_playlist()
-    playlist_id = pl.pl_id
-    with open("playlist.txt", "w") as file:
-        file.write(str(playlist_id))
-
+            )
+            response = request.execute()
+            self.pl_id = response["id"]
+            with open("playlist.txt", "w") as file:
+                file.write(str(self.pl_id))
+            return self.pl_id
 
 async def song_request(playlistId, videoId):
     from urllib.parse import urlparse

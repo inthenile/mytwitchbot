@@ -1,3 +1,4 @@
+import os
 import sys
 from twitchio.ext import commands
 import mini_game
@@ -133,22 +134,21 @@ class Bot(commands.Bot):
         except FileNotFoundError:
             await context.send(f"There was a problem with the scoreboard.")
 
+    @commands.cooldown(rate=1, per=5)
     @commands.command(aliases= ["songrequest"])
     async def sr(self, context: commands.Context):
+        sr_ins = songrequest.Playlist(songrequest.playlist_id)
+        playlist_id = await sr_ins.make_playlist()
         # parse user command to get the youtube link.
         # if they use #sr
         if "#sr" in context.message.content[:3]:
-            print(songrequest.playlist_id, context.message.content[4:])
             link = context.message.content[4:]
-            print(str(link))
         #else it must be #songrequest
         else:
-            print(songrequest.playlist_id, context.message.content[13:])
             link = context.message.content[13:]
-            print(str(link))
         try:
-            await songrequest.song_request(songrequest.playlist_id, link)
-            await context.send("Song added to playlist.")
+            await songrequest.song_request(playlist_id, link)
+            await context.send(f"{context.author.mention}'s song added to playlist.")
         except Exception as e:
             await context.send("I cannot play that link. Make sure it is a valid YouTube link.")
             print(e)
