@@ -16,7 +16,6 @@ api_service_name = "youtube"
 api_version = "v3"
 
 credentials = None
-playlist_id = None
 
 # this creates a private playlist after authorization or loads it if we saved a previous playlist id
 
@@ -43,16 +42,14 @@ if not credentials or not credentials.valid:
     youtube = build(api_service_name, api_version, credentials=credentials)
 
 class Playlist:
-    def __init__(self, pl_id):
-        self.pl_id = pl_id
-
+    playlist_id = None
     async def make_playlist(self):
         # check if you already have a playlist saved
         if os.path.exists("playlist.txt"):
             print("You already have a playlist ready to go")
             with open("playlist.txt", "r") as file:
-                self.pl_id = file.readline()
-                return self.pl_id
+                self.playlist_id = file.readline()
+                return self.playlist_id
         else:
             request = youtube.playlists().insert(
                 part="snippet,status",
@@ -67,10 +64,10 @@ class Playlist:
                 }
             )
             response = request.execute()
-            self.pl_id = response["id"]
+            self.playlist_id = response["id"]
             with open("playlist.txt", "w") as file:
-                file.write(str(self.pl_id))
-            return self.pl_id
+                file.write(str(self.playlist_id))
+            return self.playlist_id
 
 async def song_request(playlistId, videoId):
     from urllib.parse import urlparse
