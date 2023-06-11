@@ -141,7 +141,6 @@ class Bot(commands.Bot):
     async def sr(self, context: commands.Context):
         try:
             sr_ins = songrequest.Playlist()
-            playlist_id = await sr_ins.make_playlist()
             # parse user command to get the youtube link.
             # if they use #sr
             if "#sr" in context.message.content[:3]:
@@ -150,6 +149,8 @@ class Bot(commands.Bot):
             else:
                 link = context.message.content[13:]
             try:
+
+                playlist_id = await sr_ins.make_playlist()
                 await songrequest.song_request(playlist_id, link)
                 await context.send(f"{context.author.mention}'s song added to playlist.")
             except Exception as e:
