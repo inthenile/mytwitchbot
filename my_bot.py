@@ -1,6 +1,4 @@
-import os
 import sys
-
 import twitchio.ext.commands.errors
 from twitchio.ext import commands
 import mini_game
@@ -8,6 +6,7 @@ import random
 from dotenv import dotenv_values
 import songrequest
 import scoreboard
+import builds
 
 # accessing sensitive information through .env
 config = dotenv_values(".env")
@@ -72,57 +71,59 @@ class Bot(commands.Bot):
         # Greet the user
         if context.author.name != f"{bot_owner}".lower():
             await context.send(f"Hello {context.author.name}! Type #rock/#scissors/#paper "
-                               f"if you would like to play with me!")
+                               f"if you would like to play!")
         else:
             await context.send(f"Hello there, boss!")
 
+### CHAT GAME RELATED COMMANDS ###
+    @commands.cooldown(rate=1, per=10)
     @commands.command()
     async def rock(self, context: commands.Context):
         """Plays rock, paper, scissors"""
-        bot_choice = random.choice(rock_scissors_paper)
-        await context.send(f"I choose...")
-        match bot_choice:
-            case "rock":
-                await context.send(f"{bot_choice.upper()}. Looks like it's a tie.")
-            case "scissors":
-                await context.send(f"{bot_choice.upper()}. You win this time.")
-            case "paper":
-                await context.send(f"{bot_choice.upper()}. Imagine losing to a bot. KEKW")
-
+        try:
+            bot_choice = random.choice(rock_scissors_paper)
+            await context.send(f"I choose...")
+            match bot_choice:
+                case "rock":
+                    await context.send(f"{bot_choice.upper()}. Looks like it's a tie.")
+                case "scissors":
+                    await context.send(f"{bot_choice.upper()}. You win this time.")
+                case "paper":
+                    await context.send(f"{bot_choice.upper()}. Imagine losing to a bot. KEKW")
+        except twitchio.ext.commands.errors.CommandOnCooldown:
+            pass
+    @commands.cooldown(rate=1, per=10)
     @commands.command()
     async def scissors(self, context: commands.Context):
         """Plays rock, scissors, paper"""
-        bot_choice = random.choice(rock_scissors_paper)
-        await context.send(f"I choose...")
-        match bot_choice:
-            case "rock":
-                await context.send(f"{bot_choice.upper()}. Get rekt KEKW")
-            case "scissors":
-                await context.send(f"{bot_choice.upper()}. No winners.")
-            case "paper":
-                await context.send(f"{bot_choice.upper()}. You won.")
-
+        try:
+            bot_choice = random.choice(rock_scissors_paper)
+            await context.send(f"I choose...")
+            match bot_choice:
+                case "rock":
+                    await context.send(f"{bot_choice.upper()}. Get rekt KEKW")
+                case "scissors":
+                    await context.send(f"{bot_choice.upper()}. No winners.")
+                case "paper":
+                    await context.send(f"{bot_choice.upper()}. You won.")
+        except twitchio.ext.commands.errors.CommandOnCooldown:
+            pass
+    @commands.cooldown(rate=1, per=10)
     @commands.command()
     async def paper(self, context: commands.Context):
         """Plays rock, scissors, paper"""
-        bot_choice = random.choice(rock_scissors_paper)
-        await context.send(f"I choose...")
-        match bot_choice:
-            case "rock":
-                await context.send(f"{bot_choice.upper()}. You won.")
-            case "scissors":
-                await context.send(f"{bot_choice.upper()}. EZ win.")
-            case "paper":
-                await context.send(f"{bot_choice.upper()}. Tie. Go again.")
-
-    @commands.command()
-    async def shutdown(self, context: commands.Context):
-        """turn the bot off from the chat"""
-        if context.author.name != f"{bot_owner}".lower():
-            await context.send(f"You have no power here.")
-        else:
-            await context.send(f"{bot_owner} wants me gone. Goodbye :(")
-            await self.close()
+        try:
+            bot_choice = random.choice(rock_scissors_paper)
+            await context.send(f"I choose...")
+            match bot_choice:
+                case "rock":
+                    await context.send(f"{bot_choice.upper()}. You won.")
+                case "scissors":
+                    await context.send(f"{bot_choice.upper()}. EZ win.")
+                case "paper":
+                    await context.send(f"{bot_choice.upper()}. Tie. Go again.")
+        except twitchio.ext.commands.errors.CommandOnCooldown:
+            pass
 
     @commands.command()
     async def score(self, context: commands.Context):
@@ -136,20 +137,99 @@ class Bot(commands.Bot):
         except FileNotFoundError:
             await context.send(f"There was a problem with the scoreboard.")
 
+### HERE ARE BUILD SPECIFIC COMMANDS - some commands can only be used by the bot and the channel owner(s)###
+    @commands.command()
+    async def builds(self,context: commands.Context):
+        """ displays currently saved builds"""
+        await context.send(await builds.build.currently_available_builds())
+
+    @commands.command(aliases=["addbuild"])
+    async def newbuild(self, context: commands.Context):
+        if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
+                or context.author.name.lower() == f"{bot_owner}".lower():
+            """ saves a new build"""
+            message = context.message.content.split(" ")
+            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            try:
+                build_name = message[1]
+                url = message[2]
+                response = await builds.build.new_build(build_name, url)
+                await context.send(response)
+            except IndexError as error:
+                print(error)
+                await context.send("There was an error. Please try again. Don't forget the URL")
+        else:
+            await context.send("You cannot use this command.")
+
+    @commands.command(aliases=["removebuild"])
+    async def deletebuild(self, context: commands.Context):
+        """ deletes an existing build"""
+        if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
+                or context.author.name.lower() == f"{bot_owner}".lower():
+            message = context.message.content.split(" ")
+            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            try:
+                build_name = message[1]
+                response = await builds.build.delete_build(build_name)
+                await context.send(response)
+            except Exception as error:
+                print(Exception, error)
+        else:
+            await context.send("You cannot use this command.")
+    @commands.command()
+    async def updatebuild(self, context: commands.Context):
+        if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
+                or context.author.name.lower() == f"{bot_owner}".lower():
+            message = context.message.content.split(" ")
+            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            try:
+                build_name = message[1]
+                url = message[2]
+                response = await builds.build.update_build(build_name, url)
+                await context.send(response)
+            except IndexError as error:
+                print(error)
+                await context.send("There was an error. Please try again. Don't forget the URL")
+        else:
+            await context.send("You cannot use this command.")
+    @commands.command(aliases=["build"])
+    async def showbuild(self, context:commands.Context):
+        message = context.message.content.split(" ")
+        # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+        try:
+            build_name = message[1]
+            response = await builds.build.show_build(build_name)
+            await context.send(response)
+        except IndexError as error:
+            print(error)
+            await context.send("Don't forget to add the class name after the command =>"
+                               " '#showbuild necromancer' Check #builds to see all available builds.")
+
+### MISCELLANEOUS COMMANDS ###
+    @commands.command()
+    async def shutdown(self, context: commands.Context):
+        """turn the bot off from the chat"""
+        if context.author.name.lower() != f"{bot.connected_channels[0].name}".lower()\
+                or context.author.name.lower() != f"{bot_owner}".lower():
+            await context.send(f"You have no power here.")
+        else:
+            await context.send(f"{bot_owner} wants me gone. Goodbye :(")
+            await self.close()
+
     @commands.cooldown(rate=1, per=5)
-    @commands.command(aliases= ["songrequest"])
+    @commands.command(aliases=["songrequest"])
     async def sr(self, context: commands.Context):
+        """adds a youtube song to a playlist"""
         try:
             sr_ins = songrequest.Playlist()
             # parse user command to get the youtube link.
             # if they use #sr
             if "#sr" in context.message.content[:3]:
                 link = context.message.content[4:]
-            #else it must be #songrequest
+            # else it must be #songrequest
             else:
                 link = context.message.content[13:]
             try:
-
                 playlist_id = await sr_ins.make_playlist()
                 await songrequest.song_request(playlist_id, link)
                 await context.send(f"{context.author.mention}'s song added to playlist.")
@@ -158,6 +238,7 @@ class Bot(commands.Bot):
                 print(e)
         except twitchio.ext.commands.errors.CommandOnCooldown as cooldown_error:
             await context.send("Command is on cooldown.")
+
 
 # instantiate the Bot class
 bot = Bot()

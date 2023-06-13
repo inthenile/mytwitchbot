@@ -3,16 +3,16 @@ import mini_game
 import my_bot
 import random
 
-random_timer = random.randint(25, 55)
+random_timer = random.randint(20, 40)
 
 # Timers can be changed.
-@routines.routine(wait_first=True, hours=1)
+@routines.routine(wait_first=True, minutes=45)
 async def follow_reminder():
     """Reminds the audience to follow the stream"""
     await my_bot.bot.connected_channels[0].send("Enjoying the stream? "
                                                 "Make sure to drop a follow!")
 
-@routines.routine(wait_first=True, minutes=20)
+@routines.routine(wait_first=True, minutes=30)
 async def hydration_reminder():
     """Reminder to drink water"""
     random_response = ["When did you drink water last? Don't forget to hydrate.",
@@ -20,6 +20,13 @@ async def hydration_reminder():
                        "Hey you! Go drink water :)",
     ]
     await my_bot.bot.connected_channels[0].send(random.choice(random_response))
+
+@routines.routine(wait_first=False, minutes=25)
+async def builds_reminder():
+    """Reminder about build commands"""
+    reminder = "Type #builds in chat to get my builds."
+    await my_bot.bot.connected_channels[0].send(random.choice(reminder))
+
 
 @routines.routine(wait_first=True, minutes=random_timer)
 async def mini_typing_game():
