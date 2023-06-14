@@ -4,9 +4,9 @@ from twitchio.ext import commands
 import mini_game
 import random
 from dotenv import dotenv_values
-import songrequest
+from utility import songrequest
 import scoreboard
-import builds
+from gw2builds import builds
 
 # accessing sensitive information through .env
 config = dotenv_values(".env")
@@ -75,7 +75,7 @@ class Bot(commands.Bot):
         else:
             await context.send(f"Hello there, boss!")
 
-### CHAT GAME RELATED COMMANDS ###
+# CHAT GAME RELATED COMMANDS ###
     @commands.cooldown(rate=1, per=10)
     @commands.command()
     async def rock(self, context: commands.Context):
@@ -137,75 +137,83 @@ class Bot(commands.Bot):
         except FileNotFoundError:
             await context.send(f"There was a problem with the scoreboard.")
 
-### HERE ARE BUILD SPECIFIC COMMANDS - some commands can only be used by the bot and the channel owner(s)###
+# HERE ARE BUILD SPECIFIC COMMANDS - some commands can only be used by the bot and the channel owner(s)###
     @commands.command()
-    async def builds(self,context: commands.Context):
+    async def build(self,context: commands.Context):
         """ displays currently saved builds"""
         await context.send(await builds.build.currently_available_builds())
 
     @commands.command(aliases=["addbuild"])
     async def newbuild(self, context: commands.Context):
+        """saves a new build"""
         if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
                 or context.author.name.lower() == f"{bot_owner}".lower():
-            """ saves a new build"""
-            message = context.message.content.split(" ")
-            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            # message[0] is #newbuild, and since new_build(name, url) requires three parameters
+            # we get them by splitting the chat command
             try:
-                build_name = message[1]
-                url = message[2]
-                response = await builds.build.new_build(build_name, url)
+                message = context.message.content.split(" ")
+                class_name = message[1]
+                build_name = message[2]
+                url = message[3]
+                response = await builds.build.new_build(class_name, build_name, url)
                 await context.send(response)
-            except IndexError as error:
-                print(error)
-                await context.send("There was an error. Please try again. Don't forget the URL")
+            except IndexError or TypeError:
+                await context.send("There was an error. Please try again. Double check your parameters."
+                                   " #updatebuild class_name  build_name  new_link")
         else:
             await context.send("You cannot use this command.")
 
-    @commands.command(aliases=["removebuild"])
-    async def deletebuild(self, context: commands.Context):
+    @commands.command(aliases=["deletebuild"])
+    async def removebuild(self, context: commands.Context):
         """ deletes an existing build"""
         if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
                 or context.author.name.lower() == f"{bot_owner}".lower():
             message = context.message.content.split(" ")
-            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            # message[0] is #newbuild, and since new_build(name, url)
+            # requires two parameters, we get the other two by splitting)
             try:
-                build_name = message[1]
-                response = await builds.build.delete_build(build_name)
+                class_name = message[1]
+                build_name = message[2]
+                response = await builds.build.delete_build(class_name, build_name)
                 await context.send(response)
-            except Exception as error:
-                print(Exception, error)
+            except IndexError or TypeError:
+                await context.send("There was an error with the command. Type each parameter as a single word,"
+                                   "without spaces. E.g. #deletebuild  elementalist  staff-backline")
         else:
             await context.send("You cannot use this command.")
     @commands.command()
     async def updatebuild(self, context: commands.Context):
         if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
                 or context.author.name.lower() == f"{bot_owner}".lower():
-            message = context.message.content.split(" ")
-            # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+            # message[0] is updated build, and since update_build(class_name, build_name, url)
+            # requires three parameters, we get them by splitting the user command)
             try:
-                build_name = message[1]
-                url = message[2]
-                response = await builds.build.update_build(build_name, url)
+                message = context.message.content.split(" ")
+                class_name = message[1]
+                build_name = message[2]
+                url = message[3]
+                response = await builds.build.update_build(class_name, build_name, url)
                 await context.send(response)
-            except IndexError as error:
-                print(error)
-                await context.send("There was an error. Please try again. Don't forget the URL")
+            except IndexError or TypeError:
+                await context.send("There was an error. Please try again. Double check your parameters."
+                                   " #updatebuild  class_name  build_name  new_link")
         else:
             await context.send("You cannot use this command.")
-    @commands.command(aliases=["build"])
-    async def showbuild(self, context:commands.Context):
-        message = context.message.content.split(" ")
-        # message[0] is #newbuild, and since new_build(name, url) requires two parameters, we get the other two by splitting)
+    @commands.command(aliases=["showbuilds"])
+    async def builds(self, context:commands.Context):
+        # message[0] is #newbuild, and since new_build(name, url)
+        # requires two parameters, we get the other two by splitting)
         try:
+            message = context.message.content.split(" ")
             build_name = message[1]
             response = await builds.build.show_build(build_name)
             await context.send(response)
         except IndexError as error:
             print(error)
             await context.send("Don't forget to add the class name after the command =>"
-                               " '#showbuild necromancer' Check #builds to see all available builds.")
+                               " '#builds necromancer' Check #builds to see all available builds.")
 
-### MISCELLANEOUS COMMANDS ###
+# MISCELLANEOUS COMMANDS ###
     @commands.command()
     async def shutdown(self, context: commands.Context):
         """turn the bot off from the chat"""

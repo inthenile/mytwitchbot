@@ -1,4 +1,5 @@
 import os.path
+from pathlib import Path
 import pickle
 from dotenv import dotenv_values
 from googleapiclient.discovery import build
@@ -11,7 +12,7 @@ scopes = ["https://www.googleapis.com/auth/youtube.force-ssl", "https://www.goog
           "https://www.googleapis.com/auth/youtube"]
 youtube_api_key = config["YOUTUBE_API_KEY"]
 youtube_channel_id = config["YOUTUBE_CHANNEL_ID"]
-client_secrets_file = ".clients_secret.json"
+client_secrets_file = Path("utility/.clients_secret.json")
 api_service_name = "youtube"
 api_version = "v3"
 
@@ -20,9 +21,9 @@ credentials = None
 # this creates a private playlist after authorization or loads it if we saved a previous playlist id
 
 # if we have saved our credentials, we load them
-if os.path.exists('token.pickle'):
+if os.path.exists('utility/token.pickle'):
     print('Loading Credentials from file...')
-    with open('token.pickle', 'rb') as token:
+    with open('utility/token.pickle', 'rb') as token:
         credentials = pickle.load(token)
 # creating a playlist by way of example
 
@@ -37,7 +38,7 @@ if not credentials or not credentials.valid:
         flow.run_local_server()
         credentials = flow.credentials
         # writing credentials onto token.pickle for future use
-        with open('token.pickle', 'wb') as token:
+        with open('utility/token.pickle', 'wb') as token:
             pickle.dump(credentials, token)
     youtube = build(api_service_name, api_version, credentials=credentials)
 
@@ -45,9 +46,9 @@ class Playlist:
     playlist_id = None
     async def make_playlist(self):
         # check if you already have a playlist saved
-        if os.path.exists("playlist.txt"):
+        if os.path.exists("utility/playlist.txt"):
             print("You already have a playlist ready to go")
-            with open("playlist.txt", "r") as file:
+            with open("utility/playlist.txt", "r") as file:
                 self.playlist_id = file.readline()
                 return self.playlist_id
         else:
@@ -65,7 +66,7 @@ class Playlist:
             )
             response = request.execute()
             self.playlist_id = response["id"]
-            with open("playlist.txt", "w") as file:
+            with open("utility/playlist.txt", "w") as file:
                 file.write(str(self.playlist_id))
             return self.playlist_id
 

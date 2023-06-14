@@ -3,8 +3,7 @@ env/
 __pycache__/
 .idea
 Scores/scores.json
-.clients_secret.json
-token.pickle
-playlist.txt
-player.html
-builds.json
+utility/.clients_secret.json
+utility/token.pickle
+utility/playlist.txt
+gw2builds/builds.json
