@@ -1,12 +1,10 @@
 from pathlib import Path
 import json
 
-import twitchio
-
 
 class Score:
     scoreboard = {}
-    path = Path("Scores/scores.json")
+    path = Path("scores.json")
 
     def __init__(self, user):
         """initiate the class with the user's name"""
@@ -29,15 +27,19 @@ class Score:
             print(self.scoreboard)
             contents = json.dumps(self.scoreboard, indent=4)
             with self.path.open("w") as file:
-                file.write(contents)
-                file.close()
+                try:
+                    file.write(contents)
+                finally:
+                    file.close()
         # create a fresh json file if none already exists
         else:
             self.scoreboard[self.user] = new_score
             contents = json.dumps(self.scoreboard, indent=4)
             with self.path.open("w") as file:
-                file.write(contents)
-                file.close()
+                try:
+                    file.write(contents)
+                finally:
+                    file.close()
 
     async def get_score(self, user):
         """ read the score of the user that is passed as the parameter from the .json file"""

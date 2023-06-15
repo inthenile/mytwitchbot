@@ -1,5 +1,5 @@
 from twitchio.ext import routines
-import mini_game
+from game import mini_game
 import my_bot
 import random
 
@@ -28,12 +28,12 @@ async def builds_reminder():
     await my_bot.bot.connected_channels[0].send(random.choice(reminder))
 
 
-@routines.routine(wait_first=True, minutes=random_timer)
+@routines.routine(wait_first=True, seconds=random_timer)
 async def mini_typing_game():
     """A small game to get user input from the chat that repeats what the bot says
     the winner can be any of the first 3 people to type. it is completely random whether
     the first, second, or the third person is going to be the winner"""
-    if my_bot.bot.game_active == False:
+    if not my_bot.bot.game_active:
         await my_bot.bot.connected_channels[0].send(my_bot.bot.game_word)
         my_bot.bot.game_active = True
 

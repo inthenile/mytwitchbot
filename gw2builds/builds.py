@@ -14,8 +14,8 @@ class Build:
             with open("gw2builds/builds.json", "r") as f:
                 data = json.load(f)
             # read from and write into the file
-            for key in data.items():
-                #make sure the class and builds exist
+            for key in data.keys():
+                # make sure the class and builds exist
                 if class_name in data.keys() and build_name not in data[class_name]:
                     data[class_name][build_name] = link
                     response = f"{class_name} : {build_name} was successfully added."
@@ -42,10 +42,10 @@ class Build:
             return response
         # if builds.json does not exist, create it.
         except FileNotFoundError:
-            with open("gw2builds/builds.json", "w") as fl:
-                new_build = {class_name : {build_name: link}}
-                json.dump(new_build, fl)
-                fl.close()
+            with open("gw2builds/builds.json", "w") as f:
+                new_build = {class_name: {build_name: link}}
+                json.dump(new_build, f)
+                f.close()
                 response = f"{class_name} : {build_name} was successfully added."
                 return response
         finally:
@@ -62,7 +62,7 @@ class Build:
         try:
             for key, value in data.items():
                 # logic whether the given class or build name exists or not
-                if class_name != key or build_name not in value.keys():
+                if class_name != key or build_name not in value:
                     response = "Could not find the class/build combination"
                 # if the class & build exist within builds.json, delete it
                 elif class_name == key and build_name in value:
@@ -153,3 +153,4 @@ class Build:
                 f.close()
 
 build = Build()
+

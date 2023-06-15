@@ -2,7 +2,7 @@
 env/
 __pycache__/
 .idea
-Scores/scores.json
+game/scores.json
 utility/.clients_secret.json
 utility/token.pickle
 utility/playlist.txt

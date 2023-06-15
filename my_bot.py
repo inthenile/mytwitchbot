@@ -1,11 +1,11 @@
+import json
 import sys
 import twitchio.ext.commands.errors
 from twitchio.ext import commands
-import mini_game
 import random
 from dotenv import dotenv_values
 from utility import songrequest
-import scoreboard
+from game import scoreboard, mini_game
 from gw2builds import builds
 
 # accessing sensitive information through .env
@@ -13,7 +13,6 @@ config = dotenv_values(".env")
 twitch_oauth_token = config["TWITCH_OAUTH_TOKEN"]
 channels_to_connect = config["CHANNELS_TO_CONNECT"]
 bot_owner = config["BOT_OWNER"]
-
 
 # a list for a game of rock, scissors and paper
 rock_scissors_paper = ["rock", "scissors", "paper"]
@@ -37,6 +36,8 @@ class Bot(commands.Bot):
     # shows users who join the chat in the terminal window
     async def event_join(self, channel: channels_to_connect, user):
         print(f"{user.name} has joined the chat.")
+
+
 
     async def event_message(self, message):
         """This function receives messages in Twitch chat"""
@@ -141,7 +142,11 @@ class Bot(commands.Bot):
     @commands.command()
     async def build(self,context: commands.Context):
         """ displays currently saved builds"""
-        await context.send(await builds.build.currently_available_builds())
+        try:
+            await context.send(await builds.build.currently_available_builds())
+        except json.decoder.JSONDecodeError:
+            await context.send("There was an error with the build file in the system."
+                               " Delete the file and run the command again.")
 
     @commands.command(aliases=["addbuild"])
     async def newbuild(self, context: commands.Context):
@@ -160,6 +165,9 @@ class Bot(commands.Bot):
             except IndexError or TypeError:
                 await context.send("There was an error. Please try again. Double check your parameters."
                                    " #updatebuild class_name  build_name  new_link")
+            except json.decoder.JSONDecodeError:
+                await context.send("There was an error with the build file in the system."
+                                   " Delete the file and run the command again.")
         else:
             await context.send("You cannot use this command.")
 
@@ -179,6 +187,9 @@ class Bot(commands.Bot):
             except IndexError or TypeError:
                 await context.send("There was an error with the command. Type each parameter as a single word,"
                                    "without spaces. E.g. #deletebuild  elementalist  staff-backline")
+            except json.decoder.JSONDecodeError:
+                await context.send("There was an error with the build file in the system."
+                                   " Delete the file and run the command again.")
         else:
             await context.send("You cannot use this command.")
     @commands.command()
@@ -197,6 +208,9 @@ class Bot(commands.Bot):
             except IndexError or TypeError:
                 await context.send("There was an error. Please try again. Double check your parameters."
                                    " #updatebuild  class_name  build_name  new_link")
+            except json.decoder.JSONDecodeError:
+                await context.send("There was an error with the build file in the system."
+                                   " Delete the file and run the command again.")
         else:
             await context.send("You cannot use this command.")
     @commands.command(aliases=["showbuilds"])
@@ -211,7 +225,10 @@ class Bot(commands.Bot):
         except IndexError as error:
             print(error)
             await context.send("Don't forget to add the class name after the command =>"
-                               " '#builds necromancer' Check #builds to see all available builds.")
+                               " '#builds necromancer' Check #build to see all available builds.")
+        except json.decoder.JSONDecodeError:
+            await context.send("There was an error with the build file in the system."
+                               " Delete the file and run the command again.")
 
 # MISCELLANEOUS COMMANDS ###
     @commands.command()

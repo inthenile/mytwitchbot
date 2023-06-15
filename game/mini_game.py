@@ -1,7 +1,7 @@
 import asyncio
 import twitchio
 import my_bot
-from scoreboard import Score
+from game.scoreboard import Score
 
 #  list to store users who type the  game word into, and select index 0 to get the first one to type.
 list_of_users = []
