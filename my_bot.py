@@ -144,7 +144,7 @@ class Bot(commands.Bot):
         """ displays currently saved builds"""
         try:
             await context.send(await builds.build.currently_available_builds())
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError or AttributeError:
             await context.send("There was an error with the build file in the system."
                                " Delete the file and run the command again.")
 

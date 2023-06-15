@@ -4,7 +4,7 @@ import json
 
 class Score:
     scoreboard = {}
-    path = Path("scores.json")
+    path = Path("game/scores.json")
 
     def __init__(self, user):
         """initiate the class with the user's name"""

@@ -28,7 +28,7 @@ async def builds_reminder():
     await my_bot.bot.connected_channels[0].send(random.choice(reminder))
 
 
-@routines.routine(wait_first=True, seconds=random_timer)
+@routines.routine(wait_first=True, minutes=random_timer)
 async def mini_typing_game():
     """A small game to get user input from the chat that repeats what the bot says
     the winner can be any of the first 3 people to type. it is completely random whether

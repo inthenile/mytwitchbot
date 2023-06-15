@@ -1,5 +1,7 @@
 import json
 import os
+from utility.filemanager import filemanager
+
 
 class Build:
     """Used to generate and store different Guild Wars 2 builds"""
@@ -11,8 +13,8 @@ class Build:
         If it is the first build, then it creates builds.json; and enables other functions to run."""
         # load the file if it exists, or create it if it doesn't
         try:
-            with open("gw2builds/builds.json", "r") as f:
-                data = json.load(f)
+            f = filemanager.file_open_to_read()
+            data = json.load(f)
             # read from and write into the file
             for key in data.keys():
                 # make sure the class and builds exist
@@ -31,32 +33,33 @@ class Build:
                     break
             # if the file exists, but it is empty
             if len(data) == 0:
-                with open("gw2builds/builds.json", "w") as fl:
-                    new_build = {class_name: {build_name: link}}
-                    data.update(new_build)
-                    fl.close()
-                    response = f"{class_name} : {build_name} was successfully added."
-            with open("gw2builds/builds.json", "w") as fl:
-                json.dump(data, fl)
+                fl = filemanager.file_open_to_write()
+                new_build = {class_name: {build_name: link}}
+                data.update(new_build)
                 fl.close()
+                response = f"{class_name} : {build_name} was successfully added."
+            fl = filemanager.file_open_to_write()
+            json.dump(data, fl)
+            fl.close()
             return response
         # if builds.json does not exist, create it.
+        # though filemanager ensures this file exist at the start of the program
+        # it is best to make sure nothing funny happens due to an unexpected deletion
         except FileNotFoundError:
-            with open("gw2builds/builds.json", "w") as f:
-                new_build = {class_name: {build_name: link}}
-                json.dump(new_build, f)
-                f.close()
-                response = f"{class_name} : {build_name} was successfully added."
-                return response
+            f = filemanager.file_open_to_write()
+            new_build = {class_name: {build_name: link}}
+            json.dump(new_build, f)
+            f.close()
+            response = f"{class_name} : {build_name} was successfully added."
+            return response
         finally:
-            if os.path.exists("gw2builds/builds.json"):
-                f.close()
+            filemanager.file_close(f)
 
     async def delete_build(self, class_name, build_name):
         """Deletes an existing build on builds.json. if such a build exists."""
         try:
-            with open("gw2builds/builds.json", "r") as f:
-                data = json.load(f)
+            f = filemanager.file_open_to_read()
+            data = json.load(f)
         except FileNotFoundError:
             return "There are no builds saved. Use #newbuild command first"
         try:
@@ -74,52 +77,48 @@ class Build:
                         data = data2
                     response = f"{build_name} was removed"
                     break
-            with open("gw2builds/builds.json", "w") as fl:
-                json.dump(data, fl)
-                fl.close()
-                return response
+            fl = filemanager.file_open_to_write()
+            json.dump(data, fl)
+            fl.close()
+            return response
         finally:
-            if os.path.exists("gw2builds/builds.json"):
-                f.close()
+            filemanager.file_close(f)
 
     async def update_build(self, class_name, build_name, link):
         """Updates existing builds that are in builds.json. if such a build exists."""
         try:
-            with open("gw2builds/builds.json", "r") as f:
-                data = json.load(f)
+            f = filemanager.file_open_to_read()
+            data = json.load(f)
         except FileNotFoundError:
             return "There are no builds saved. Use #newbuild command first"
-
         try:
             for key, value in data.items():
-                for b_name, b_link in value.items():
-                    # make sure the class and builds exist
-                    if class_name not in data.keys():
-                        response = f"No classes found for '{class_name}'. #build for available classes information."
+                # make sure the class and builds exist
+                if class_name not in key:
+                    response = f"No classes found for '{class_name}'. #build for available classes information."
 
-                    elif class_name == key and build_name != b_name:
-                        response = f"No such build was found for {class_name}"
+                elif class_name == key and build_name not in value:
+                    response = f"No such build was found for {class_name}"
 
-                    # only get the correct class and build name combination
-                    elif class_name == key and build_name == b_name:
-                        value[b_name] = value[b_name].replace(b_link, link)
-                        response = f"{build_name} was successfully updated."
-                        break
-            with open("gw2builds/builds.json", "w") as fl:
-                json.dump(data, fl)
-                fl.close()
+                # only get the correct class and build name combination
+                elif class_name == key and build_name in value:
+                    value[build_name] = value[build_name].replace(value[build_name], link)
+                    response = f"{build_name} was successfully updated."
+                    break
+            fl = filemanager.file_open_to_write()
+            json.dump(data, fl)
+            fl.close()
             return response
 
         finally:
-            if os.path.exists("gw2builds/builds.json"):
-                f.close()
+            filemanager.file_close(f)
 
     async def show_build(self, name):
         """Reads from builds.json to show the key-pair values,
          if any exists, for the given class. Else, nothing is returned"""
         try:
-            with open("gw2builds/builds.json", "r") as f:
-                data = json.load(f)
+            f = filemanager.file_open_to_read()
+            data = json.load(f)
         except FileNotFoundError:
             return "There are no builds saved. Use #newbuild command first"
         try:
@@ -128,16 +127,16 @@ class Build:
                     return f"{class_name}".title()+f" builds: {builds}"
             return f"There is no such build/class. Check #build to see the list of builds."
         finally:
-            if os.path.exists("gw2builds/builds.json"):
-                f.close()
+            filemanager.file_close(f)
+
+
     async def currently_available_builds(self):
         """a quick reminder to let users know what commands they can use based on the available builds"""
         try:
-            with open("gw2builds/builds.json", "r") as f:
-                data = json.load(f)
+            f = filemanager.file_open_to_read()
+            data = json.load(f)
         except FileNotFoundError:
             return "No builds saved"
-
         try:
             classes = []
             for key, value in data.items():
@@ -149,8 +148,8 @@ class Build:
                             f" Use #builds and type any of these names to see builds. => #builds elementalist"
             return response
         finally:
-            if os.path.exists("gw2builds/builds.json"):
-                f.close()
+            filemanager.file_close(f)
 
 build = Build()
+
 
