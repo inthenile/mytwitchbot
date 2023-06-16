@@ -4,7 +4,7 @@ import twitchio.ext.commands.errors
 from twitchio.ext import commands
 import random
 from dotenv import dotenv_values
-from utility import songrequest
+from utility import spotify
 from game import scoreboard, mini_game
 from gw2builds import builds
 
@@ -226,7 +226,25 @@ class Bot(commands.Bot):
             await context.send("There was an error with the build file in the system."
                                " Delete the file and run the command again.")
 
-# MISCELLANEOUS COMMANDS ###
+# SPOTIFY COMMANDS #
+    @commands.command(aliases=["song"])
+    async def currentsong(self, context: commands.Context):
+        """outputs the currently playing song to the chat"""
+        request = await spotify.get_playing_song()
+        try:
+            artist_name = request["item"]["artists"][0]["name"]
+            song_name = request["item"]["name"]
+            await context.send(f"Currently playing: {artist_name} - {song_name}")
+        except Exception:
+            await context.send(f"There are problems with Spotify right now.")
+
+    @commands.command()
+    async def refreshtoken(self, context: commands.Context):
+        if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
+                or context.author.name.lower() == f"{bot_owner}".lower():
+            await spotify.refresh_access_token()
+
+# MISCELLANEOUS COMMANDS #
     @commands.command()
     async def shutdown(self, context: commands.Context):
         """turn the bot off from the chat"""
@@ -236,29 +254,6 @@ class Bot(commands.Bot):
         else:
             await context.send(f"{bot_owner} wants me gone. Goodbye :(")
             await self.close()
-
-    @commands.cooldown(rate=1, per=5)
-    @commands.command(aliases=["songrequest"])
-    async def sr(self, context: commands.Context):
-        """adds a youtube song to a playlist"""
-        try:
-            sr_ins = songrequest.Playlist()
-            # parse user command to get the youtube link.
-            # if they use #sr
-            if "#sr" in context.message.content[:3]:
-                link = context.message.content[4:]
-            # else it must be #songrequest
-            else:
-                link = context.message.content[13:]
-            try:
-                playlist_id = await sr_ins.make_playlist()
-                await songrequest.song_request(playlist_id, link)
-                await context.send(f"{context.author.mention}'s song added to playlist.")
-            except Exception as e:
-                await context.send("I cannot play that link. Make sure it is a valid YouTube link.")
-                print(e)
-        except twitchio.ext.commands.errors.CommandOnCooldown as cooldown_error:
-            await context.send("Command is on cooldown.")
 
 
 # instantiate the Bot class

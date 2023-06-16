@@ -12,13 +12,10 @@ async def mini_game(response: twitchio.Message):
             list_of_users.append(response.author.name)
 
 async def check_game_status():
-    x = 1
     loop = asyncio.get_running_loop()
     # the seconds to wait for before the timer runs out.
     end = loop.time() + 15
     while True:
-        x+=1
-        print(f"{x} seconds passed")
         await asyncio.sleep(1)
     # check whether there is a winner or not, and change the game_active flag.
     # get the first person to have been added to the list, and declare them the winner.

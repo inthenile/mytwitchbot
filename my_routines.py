@@ -3,7 +3,7 @@ from game import mini_game
 import my_bot
 import random
 
-random_timer = random.randint(15, 35)
+random_timer = random.randint(5, 45)
 
 # Timers can be changed.
 @routines.routine(wait_first=True, minutes=45)
