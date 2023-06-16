@@ -40,11 +40,8 @@ class Bot(commands.Bot):
 
     async def event_message(self, message):
         """This function receives messages in Twitch chat"""
-        # ignore messages by the bot unless it is part of the mini-game
-        if message.echo and message.content != f"{self.game_word}":
-            return
-        # just to let the user know about a game starting (can be removed)
-        elif message.echo and message.content == f"{self.game_word}":
+        # ignore messages by the bot
+        if message.echo:
             return
 
         # receives messages and responses to commands.
