@@ -3,7 +3,7 @@ from game import mini_game
 import my_bot
 import random
 
-random_timer = random.randint(20, 40)
+random_timer = random.randint(15, 35)
 
 # Timers can be changed.
 @routines.routine(wait_first=True, minutes=45)
@@ -21,7 +21,7 @@ async def hydration_reminder():
     ]
     await my_bot.bot.connected_channels[0].send(random.choice(random_response))
 
-@routines.routine(wait_first=False, minutes=25)
+@routines.routine(wait_first=True, minutes=25)
 async def builds_reminder():
     """Reminder about build commands"""
     reminder = "Type #builds in chat to get my builds."
@@ -36,7 +36,6 @@ async def mini_typing_game():
     if not my_bot.bot.game_active:
         await my_bot.bot.connected_channels[0].send(my_bot.bot.game_word)
         my_bot.bot.game_active = True
-
         await mini_game.check_game_status()
 
 

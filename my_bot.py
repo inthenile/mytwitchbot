@@ -20,6 +20,7 @@ rock_scissors_paper = ["rock", "scissors", "paper"]
 class Bot(commands.Bot):
     game_active = False
     game_word = "beep boop"
+    user_greetings = ("hello", "hi", "hey", "heyguys", "yo")
 
     def __init__(self):
         # Access token, command prefix, and the channels to be connected.
@@ -37,8 +38,6 @@ class Bot(commands.Bot):
     async def event_join(self, channel: channels_to_connect, user):
         print(f"{user.name} has joined the chat.")
 
-
-
     async def event_message(self, message):
         """This function receives messages in Twitch chat"""
         # ignore messages by the bot unless it is part of the mini-game
@@ -46,21 +45,21 @@ class Bot(commands.Bot):
             return
         # just to let the user know about a game starting (can be removed)
         elif message.echo and message.content == f"{self.game_word}":
-            print("A mini-game has just started")
+            return
+
+        # receives messages and responses to commands.
+        await self.handle_commands(message)
+
+        print(f"{message.author.name} : {message.content}")
+
+        # Returns the greetings of a user
+        if message.content.casefold() in self.user_greetings:
+            await message.channel.send(f"HeyGuys  {message.author.mention}")
+
         # if the game is active, pass the messages sent as an argument to the mini-game.
         if self.game_active:
             await mini_game.mini_game(message)
-            # shows the messages in the terminal
-        else:
-            print(f"{message.author.name} : {message.content}")
 
-            # Returns the greetings of a user
-            user_greetings = ("hello", "hi", "hey", "heyguys", "yo")
-            if message.content.casefold() in user_greetings:
-                await message.channel.send(f"HeyGuys  {message.author.mention}")
-
-            # receives messages and responses to commands.
-            await self.handle_commands(message)
 
     # shutdown the bot from the chat
     async def close(self):
