@@ -4,6 +4,4 @@ __pycache__/
 .idea
 game/scores.json
 utility/.clients_secret.json
-utility/token.pickle
-utility/playlist.txt
 gw2builds/builds.json

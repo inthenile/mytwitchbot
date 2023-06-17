@@ -226,12 +226,12 @@ class Bot(commands.Bot):
             await context.send("There was an error with the build file in the system."
                                " Delete the file and run the command again.")
 
-# SPOTIFY COMMANDS #
+    # SPOTIFY COMMANDS #
     @commands.command(aliases=["song"])
     async def currentsong(self, context: commands.Context):
         """outputs the currently playing song to the chat"""
-        request = await spotify.get_playing_song()
         try:
+            request = await spotify.get_playing_song()
             artist_name = request["item"]["artists"][0]["name"]
             song_name = request["item"]["name"]
             await context.send(f"Currently playing: {artist_name} - {song_name}")
@@ -242,9 +242,12 @@ class Bot(commands.Bot):
     async def refreshtoken(self, context: commands.Context):
         if context.author.name.lower() == f"{bot.connected_channels[0].name}".lower()\
                 or context.author.name.lower() == f"{bot_owner}".lower():
-            await spotify.refresh_access_token()
+            try:
+                await spotify.refresh_access_token()
+            except Exception:
+                await context.send(f"There are problems with Spotify right now.")
 
-# MISCELLANEOUS COMMANDS #
+    # MISCELLANEOUS COMMANDS #
     @commands.command()
     async def shutdown(self, context: commands.Context):
         """turn the bot off from the chat"""
